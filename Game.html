@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quest for the Egg of the World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: #8B7355;
+            overflow: hidden;
+        }
+        
+        #gameContainer::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            height: 85%;
+            background: radial-gradient(ellipse 100% 100%, #5B9BD5 0%, #4682B4 60%, #3a6b94 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .stream {
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            width: 80px;
+            height: 225px;
+            background: linear-gradient(135deg, #5B9BD5 0%, #4682B4 50%, #3a6b94 100%);
+            border-radius: 40px 40px 60px 60px;
+            z-index: 3;
+            transform: rotate(-35deg);
+        }
+        
+        .stream::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #5B9BD5 0%, #4682B4 100%);
+            border-radius: 50%;
+        }
+        
+        #gameContainer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle 3px at 8% 20%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 4px at 10% 40%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 3px at 6% 60%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 4px at 12% 80%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 3px at 92% 25%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 4px at 94% 45%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 3px at 90% 65%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 4px at 88% 85%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 3px at 50% 8%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 4px at 45% 5%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 3px at 55% 95%, #228B22 100%, transparent 100%),
+                radial-gradient(circle 4px at 50% 92%, #228B22 100%, transparent 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .game-element {
+            position: absolute;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+        
+        #boat {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            z-index: 10;
+        }
+        
+        #fog {
+            font-size: 80px;
+            z-index: 5;
+        }
+        
+        #merChicks, #leviathan, #cattails {
+            width: 180px;
+            height: 180px;
+            object-fit: contain;
+            z-index: 5;
+        }
+        
+        .obstacle {
+            font-size: 60px;
+            z-index: 5;
+        }
+        
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-areas: 
+                ". up ."
+                "left down right";
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #333;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        
+        .control-btn:active {
+            background: rgba(200, 200, 200, 0.8);
+        }
+        
+        #upBtn { grid-area: up; }
+        #downBtn { grid-area: down; }
+        #leftBtn { grid-area: left; }
+        #rightBtn { grid-area: right; }
+        
+        #dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: none;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        #dialog.show {
+            display: block;
+        }
+        
+        #dialogText {
+            margin-bottom: 20px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        #answerInput {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #333;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        #submitBtn, #dismissBtn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #submitBtn:hover, #dismissBtn:hover {
+            background: #45a049;
+        }
+        
+        #dismissBtn {
+            background: #2196F3;
+        }
+        
+        #dismissBtn:hover {
+            background: #0b7dda;
+        }
+        
+        #title {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 50;
+        }
+        
+        #healthBar {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 3px solid white;
+            border-radius: 15px;
+            z-index: 50;
+            overflow: hidden;
+        }
+        
+        #healthFill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #ff0000, #ff6b6b, #4CAF50);
+            transition: width 0.3s ease;
+        }
+        
+        #healthText {
+            position: fixed;
+            top: 73px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            z-index: 51;
+        }
+        
+        #eggDisplay {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            z-index: 15;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="title">THE QUEST FOR THE EGG OF THE WORLD</div>
+    <div id="healthBar">
+        <div id="healthFill"></div>
+    </div>
+    <div id="healthText">Health: 100</div>
+    <div id="gameContainer">
+        <div class="stream"></div>
+        <img id="boat" class="game-element" src="https://static.wixstatic.com/media/3b24e6_f573c553e6c7419d911c4a10bb82ef2a~mv2.jpg" alt="Boat">
+        <div id="fog" class="game-element">🌫️</div>
+        <img id="merChicks" class="game-element" src="https://static.wixstatic.com/media/3b24e6_61d42b7458a2417585c91aa8ec4ad3ad~mv2.png" alt="Mer-chicks">
+        <img id="leviathan" class="game-element" src="https://static.wixstatic.com/media/3b24e6_9d608e88e4af4c7e865b1b8cdc418d78~mv2.jpg" alt="Leviathan">
+        <img id="cattails" class="game-element" src="https://static.wixstatic.com/media/3b24e6_b44c6b31de9d47d192e8c607eb8f2a5e~mv2.png" alt="Cattails">
+        <div id="waves" class="game-element obstacle">🌊</div>
+        <div id="tornado" class="game-element obstacle">🌪️</div>
+        <img id="eggDisplay" src="https://static.wixstatic.com/media/3b24e6_bc217a0c42894216993f228b58c80ef9~mv2.png" alt="Egg of the World">
+    </div>
+    
+    <div id="controls">
+        <button id="upBtn" class="control-btn">↑</button>
+        <button id="leftBtn" class="control-btn">←</button>
+        <button id="downBtn" class="control-btn">↓</button>
+        <button id="rightBtn" class="control-btn">→</button>
+    </div>
+    
+    <div id="dialog">
+        <div id="dialogText"></div>
+        <input type="text" id="answerInput" placeholder="Enter your answer...">
+        <button id="submitBtn">Submit</button>
+        <button id="dismissBtn" style="display:none;">OK</button>
+    </div>
+    
+    <script>
+        const boat = document.getElementById('boat');
+        const fog = document.getElementById('fog');
+        const merChicks = document.getElementById('merChicks');
+        const leviathan = document.getElementById('leviathan');
+        const cattails = document.getElementById('cattails');
+        const waves = document.getElementById('waves');
+        const tornado = document.getElementById('tornado');
+        const dialog = document.getElementById('dialog');
+        const dialogText = document.getElementById('dialogText');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const dismissBtn = document.getElementById('dismissBtn');
+        const eggDisplay = document.getElementById('eggDisplay');
+        const healthFill = document.getElementById('healthFill');
+        const healthText = document.getElementById('healthText');
+        
+        let FogOvercome = false;
+        let MerChicksOvercome = false;
+        let LeviathanOvercome = false;
+        let health = 100;
+        
+        let boatX = window.innerWidth * 0.08;
+        let boatY = window.innerHeight * 0.5;
+        
+        // Initialize positions
+        function initPositions() {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            
+            boat.style.left = boatX + 'px';
+            boat.style.top = boatY + 'px';
+            
+            fog.style.left = (w * 0.4) + 'px';
+            fog.style.top = (h * 0.3) + 'px';
+            
+            merChicks.style.left = (w * 0.5) + 'px';
+            merChicks.style.top = (h * 0.65) + 'px';
+            
+            leviathan.style.left = (w * 0.7) + 'px';
+            leviathan.style.top = (h * 0.2) + 'px';
+            
+            waves.style.left = (w * 0.3) + 'px';
+            waves.style.top = (h * 0.55) + 'px';
+            
+            tornado.style.left = (w * 0.6) + 'px';
+            tornado.style.top = (h * 0.4) + 'px';
+            
+            cattails.style.left = (w * 0.35) + 'px';
+            cattails.style.top = (h * 0.5) + 'px';
+        }
+        
+        // Wait for window to fully load before positioning
+        window.addEventListener('load', initPositions);
+        initPositions();
+        
+        function moveBoat(dx, dy) {
+            const newX = boatX + dx;
+            const newY = boatY + dy;
+            
+            // Calculate if boat would be in the lake (oval boundary check)
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const radiusX = window.innerWidth * 0.45; // 90% width / 2
+            const radiusY = window.innerHeight * 0.425; // 85% height / 2
+            
+            // Ellipse equation: ((x-cx)/rx)^2 + ((y-cy)/ry)^2 <= 1
+            const normalizedX = (newX + 40 - centerX) / radiusX; // +40 to check boat center
+            const normalizedY = (newY + 40 - centerY) / radiusY;
+            const isInLake = (normalizedX * normalizedX + normalizedY * normalizedY) <= 1;
+            
+            // Check if boat is in the stream area - simplified bounding box approach
+            const streamLeft = window.innerWidth * 0.02 - 20;
+            const streamTop = window.innerHeight * 0.02 - 20;
+            const streamRight = streamLeft + 200;
+            const streamBottom = streamTop + 250;
+            
+            const boatCenterX = newX + 40;
+            const boatCenterY = newY + 40;
+            
+            const isInStreamBox = boatCenterX >= streamLeft && boatCenterX <= streamRight &&
+                                  boatCenterY >= streamTop && boatCenterY <= streamBottom;
+            
+            // Only allow movement if boat stays in the lake or stream area
+            if (isInLake || isInStreamBox) {
+                boatX = newX;
+                boatY = newY;
+                
+                boatX = Math.max(0, Math.min(window.innerWidth - 80, boatX));
+                boatY = Math.max(0, Math.min(window.innerHeight - 80, boatY));
+                
+                boat.style.left = boatX + 'px';
+                boat.style.top = boatY + 'px';
+                
+                checkCollisions();
+            }
+        }
+        
+        function checkCollision(elem1, elem2) {
+            const rect1 = elem1.getBoundingClientRect();
+            const rect2 = elem2.getBoundingClientRect();
+            
+            return !(rect1.right < rect2.left || 
+                     rect1.left > rect2.right || 
+                     rect1.bottom < rect2.top || 
+                     rect1.top > rect2.bottom);
+        }
+        
+        let currentChallenge = '';
+        let lastWarning = '';
+        
+        function checkCollisions() {
+            if (checkCollision(boat, waves)) {
+                showMessage("Game Over! Your ship was sunk by big waves!");
+                resetGame();
+                return;
+            }
+            
+            if (checkCollision(boat, tornado)) {
+                showMessage("Game Over! Your ship was sucked up by a tornado!");
+                resetGame();
+                return;
+            }
+            
+            if (checkCollision(boat, cattails)) {
+                showMessage("Game Over! Your boat was grounded in the marsh!");
+                resetGame();
+                return;
+            }
+            
+            if (checkCollision(boat, fog) && !FogOvercome) {
+                currentChallenge = 'fog';
+                showDialog("What crosses the Rubicon but breaks no stone? Decode FOXFNLQJWRQ using the same cypher and shift as the sword of the stone. ");
+            }
+            
+            if (checkCollision(boat, merChicks)) {
+                if (FogOvercome && !MerChicksOvercome) {
+                    currentChallenge = 'merChicks';
+                    showDialog("What is the sound all chickens know?Atbash cypher: XOFXP");
+                } else if (!FogOvercome && lastWarning !== 'merChicks') {
+                    lastWarning = 'merChicks';
+                    showMessage("You're off course! Head NNW");
+                }
+            }
+            
+            if (checkCollision(boat, leviathan)) {
+                if (FogOvercome && MerChicksOvercome && !LeviathanOvercome) {
+                    currentChallenge = 'leviathan';
+                    showDialog("Who was the chicken that solved the riddles in THE QUEST FOR THE EGG OF THE WORLD?The letters were shifted by the unlucky number... PLCUREJVAT");
+                } else if ((!FogOvercome || !MerChicksOvercome) && lastWarning !== 'leviathan') {
+                    lastWarning = 'leviathan';
+                    showMessage("You're off course! Head SW");
+                }
+            }
+        }
+        
+        function showDialog(text) {
+            dialogText.textContent = text;
+            answerInput.style.display = 'block';
+            answerInput.value = '';
+            submitBtn.style.display = 'block';
+            dismissBtn.style.display = 'none';
+            dialog.classList.add('show');
+        }
+        
+        function showMessage(text) {
+            dialogText.textContent = text;
+            answerInput.style.display = 'none';
+            submitBtn.style.display = 'none';
+            dismissBtn.style.display = 'block';
+            dialog.classList.add('show');
+        }
+        
+        function hideDialog() {
+            dialog.classList.remove('show');
+            lastWarning = '';
+        }
+        
+        function updateHealth(damage) {
+            health = Math.max(0, health - damage);
+            healthFill.style.width = health + '%';
+            healthText.textContent = 'Health: ' + health;
+            
+            if (health <= 0) {
+                showMessage("Game Over! Your chicken was defeated!");
+                resetGame();
+            }
+        }
+        
+        function resetGame() {
+            setTimeout(() => {
+                FogOvercome = false;
+                MerChicksOvercome = false;
+                LeviathanOvercome = false;
+                health = 100;
+                healthFill.style.width = '100%';
+                healthText.textContent = 'Health: 100';
+                boatX = window.innerWidth * 0.08;
+                boatY = window.innerHeight * 0.5;
+                boat.style.left = boatX + 'px';
+                boat.style.top = boatY + 'px';
+                eggDisplay.style.display = 'none';
+                fog.style.display = 'block';
+                merChicks.style.display = 'block';
+                leviathan.style.display = 'block';
+            }, 2000);
+        }
+        
+        submitBtn.addEventListener('click', () => {
+            const answer = answerInput.value.trim().toUpperCase();
+            
+            if (currentChallenge === 'fog' && answer === 'CLUCKINGTON') {
+                FogOvercome = true;
+                fog.style.display = 'none';
+                hideDialog();
+            } else if (currentChallenge === 'fog' && answer !== '') {
+                updateHealth(10);
+                answerInput.value = '';
+                answerInput.placeholder = 'Try again... (-10 health)';
+            } else if (currentChallenge === 'merChicks' && answer === 'CLUCK') {
+                MerChicksOvercome = true;
+                merChicks.style.display = 'none';
+                hideDialog();
+            } else if (currentChallenge === 'merChicks' && answer !== '') {
+                updateHealth(10);
+                answerInput.value = '';
+                answerInput.placeholder = 'Try again... (-10 health)';
+            } else if (currentChallenge === 'leviathan' && answer === 'CYPHERWING') {
+                LeviathanOvercome = true;
+                leviathan.style.display = 'none';
+                hideDialog();
+                displayEgg();
+            } else if (currentChallenge === 'leviathan' && answer !== '') {
+                updateHealth(25);
+                answerInput.value = '';
+                answerInput.placeholder = 'Try again... (-25 health)';
+            }
+        });
+        
+        dismissBtn.addEventListener('click', hideDialog);
+        
+        function displayEgg() {
+            eggDisplay.style.display = 'block';
+            eggDisplay.style.left = (boatX + 10) + 'px';
+            eggDisplay.style.top = (boatY + 10) + 'px';
+            
+            setTimeout(() => {
+                boatX = window.innerWidth * 0.08;
+                boatY = window.innerHeight * 0.5;
+                boat.style.left = boatX + 'px';
+                boat.style.top = boatY + 'px';
+                eggDisplay.style.left = (boatX + 10) + 'px';
+                eggDisplay.style.top = (boatY + 10) + 'px';
+                
+                showMessage("Congratulations! You have found the Egg of the World! 🎉");
+            }, 1000);
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (dialog.classList.contains('show')) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    moveBoat(0, -10);
+                    break;
+                case 'ArrowDown':
+                    moveBoat(0, 10);
+                    break;
+                case 'ArrowLeft':
+                    moveBoat(-10, 0);
+                    break;
+                case 'ArrowRight':
+                    moveBoat(10, 0);
+                    break;
+            }
+        });
+        
+        // Button controls
+        document.getElementById('upBtn').addEventListener('click', () => moveBoat(0, -10));
+        document.getElementById('downBtn').addEventListener('click', () => moveBoat(0, 10));
+        document.getElementById('leftBtn').addEventListener('click', () => moveBoat(-10, 0));
+        document.getElementById('rightBtn').addEventListener('click', () => moveBoat(10, 0));
+        
+        // Allow Enter key to submit answer
+        answerInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>

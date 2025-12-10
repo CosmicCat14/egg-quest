@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="https://static.wixstatic.com/media/3b24e6_f573c553e6c7419d911c4a10bb82ef2a~mv2.jpg" type="image/x-icon">
     <title>The Quest for the Egg of the World</title>
+    <link rel="shortcut icon" href="https://static.wixstatic.com/media/3b24e6_f573c553e6c7419d911c4a10bb82ef2a~mv2.jpg" type="image/x-icon">
     <style>
         * {
             margin: 0;
@@ -353,6 +353,18 @@
         window.addEventListener('load', initPositions);
         initPositions();
         
+        // Show start message
+        function showStartMessage() {
+            dialogText.textContent = "Save Chickenopolis from foxes and famine with the Egg of the World. You must navigate your boat through hazards and challenges. Find and complete three cyphers to attain the Egg of the World. Hurry! Foxes are fast and famine is near.";
+            answerInput.style.display = 'none';
+            submitBtn.style.display = 'none';
+            dismissBtn.style.display = 'block';
+            dismissBtn.textContent = 'Start Game';
+            dialog.classList.add('show');
+        }
+        
+        showStartMessage();
+        
         function moveBoat(dx, dy) {
             const newX = boatX + dx;
             const newY = boatY + dy;
@@ -429,13 +441,13 @@
             
             if (checkCollision(boat, fog) && !FogOvercome) {
                 currentChallenge = 'fog';
-                showDialog("What crosses the Rubicon but breaks no stone? Decode FOXFNLQJWRQ using the same cypher and shift as the sword of the stone. ");
+                showDialog("What crosses the Rubicon but breaks no stone? Decode FOXFNLQJWRQ");
             }
             
             if (checkCollision(boat, merChicks)) {
                 if (FogOvercome && !MerChicksOvercome) {
                     currentChallenge = 'merChicks';
-                    showDialog("What is the sound all chickens know?Atbash cypher: XOFXP");
+                    showDialog("What is the sound all chickens know? XOFXP");
                 } else if (!FogOvercome && lastWarning !== 'merChicks') {
                     lastWarning = 'merChicks';
                     showMessage("You're off course! Head NNW");
@@ -445,7 +457,7 @@
             if (checkCollision(boat, leviathan)) {
                 if (FogOvercome && MerChicksOvercome && !LeviathanOvercome) {
                     currentChallenge = 'leviathan';
-                    showDialog("Who was the chicken that solved the riddles in THE QUEST FOR THE EGG OF THE WORLD?The letters were shifted by the unlucky number... PLCUREJVAT");
+                    showDialog("Who was the chicken that solved the riddles in THE QUEST FOR THE EGG OF THE WORLD? PLCURERJVAT");
                 } else if ((!FogOvercome || !MerChicksOvercome) && lastWarning !== 'leviathan') {
                     lastWarning = 'leviathan';
                     showMessage("You're off course! Head SW");
@@ -472,6 +484,10 @@
         
         function hideDialog() {
             dialog.classList.remove('show');
+            if (!gameStarted) {
+                gameStarted = true;
+                dismissBtn.textContent = 'OK';
+            }
         }
         
         function updateHealth(damage) {
@@ -480,7 +496,7 @@
             healthText.textContent = 'Health: ' + health;
             
             if (health <= 0) {
-                showMessage("Game Over! Your chicken was defeated!");
+                showMessage("Game Over! You ran out of health!");
                 resetGame();
             }
         }
@@ -501,6 +517,8 @@
                 fog.style.display = 'block';
                 merChicks.style.display = 'block';
                 leviathan.style.display = 'block';
+                gameStarted = false;
+                showStartMessage();
             }, 2000);
         }
         

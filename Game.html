@@ -484,10 +484,7 @@
         
         function hideDialog() {
             dialog.classList.remove('show');
-            if (!gameStarted) {
-                gameStarted = true;
-                dismissBtn.textContent = 'OK';
-            }
+            lastWarning = '';
         }
         
         function updateHealth(damage) {
@@ -517,8 +514,6 @@
                 fog.style.display = 'block';
                 merChicks.style.display = 'block';
                 leviathan.style.display = 'block';
-                gameStarted = false;
-                showStartMessage();
             }, 2000);
         }
         
@@ -604,6 +599,7 @@
                 submitBtn.click();
             }
         });
+
     </script>
 </body>
 </html>

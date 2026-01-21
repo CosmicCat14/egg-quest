@@ -82,6 +82,7 @@
             
             const { script, id } = widgetConfigs[widgetType];
             const scriptSrc = `${WIDGETS_BASE_URL}/static/${script}`;
+            config.isFreeMode = true;
             if (typeof config.isFreeMode === "undefined") config.isFreeMode = widget.includes('-pro');
             const isFreeMode = ["localhost", "127.0.0.1", "cosmiccatnebula.wixsite.com", "editor.wix.com"].includes(window.location.hostname.toLowerCase()) || config.isFreeMode === true;
             const iframeConfig = {...config, useContainerSize: true, isFreeMode: isFreeMode};
